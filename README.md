@@ -14,15 +14,7 @@ Built for simplicity and flexibility, it enables seamless integration between AI
 ![MIT](https://img.shields.io/github/license/copilotkit/copilotkit?color=%236963ff&label=License)
 ![Discord](https://img.shields.io/discord/1379082175625953370?logo=discord&logoColor=%23FFFFFF&label=Discord&color=%236963ff)
 
-  <a href="https://discord.gg/Jd3FzfdJa8" target="_blank">
-   Join our Discord →
-  </a> &nbsp;&nbsp;&nbsp;
-    <a href="https://ag-ui.com/" target="_blank">
-   Read the Docs →
-  </a> &nbsp;&nbsp;&nbsp;
-    <a href="https://x.com/CopilotKit" target="_blank">
-   Follow us →
-  </a> 
+<a href="https://discord.gg/Jd3FzfdJa8" target="_blank"> Join our Discord → </a> &nbsp;&nbsp;&nbsp; <a href="https://ag-ui.com/" target="_blank"> Read the Docs → </a> &nbsp;&nbsp;&nbsp; <a href="https://dojo.ag-ui.com/" target="_blank"> Go to the AG-UI Dojo → </a> &nbsp;&nbsp;&nbsp; <a href="https://x.com/CopilotKit" target="_blank"> Follow us → </a>
 
 <img width="4096" height="1752" alt="Your application-AG-UI protocol" src="https://github.com/user-attachments/assets/dc58c64c-3257-490a-b827-e163475f4166" />
 
@@ -31,9 +23,12 @@ Create a new AG-UI application in seconds:
 ```bash
 npx create-ag-ui-app my-agent-app
 ```
-<h3>Building AG-UI Integrations (new frameworks):</h3>
 
-- [Build new integrations (Quickstart)](https://go.copilotkit.ai/agui-contribute)
+<h3> Useful Links:</h3>
+
+- [The AG-UI Dojo](https://dojo.ag-ui.com/)
+- [Build AG-UI-powered applications(Quickstart)](https://docs.ag-ui.com/quickstart/applications)
+- [Build new AG-UI framework integrations (Quickstart)](https://go.copilotkit.ai/agui-contribute)
 - [Book a call to discuss an AG-UI integration with a new framework](https://calendly.com/markus-copilotkit/ag-ui)
 - [Join the Discord Community](https://discord.gg/Jd3FzfdJa8)
 
