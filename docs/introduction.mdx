@@ -5,21 +5,52 @@ description:
 
 # The Agent–User Interaction (AG-UI) Protocol
 
-*A horizontal standard to bring AI agents into user‑facing frontend applications.*
 
-AG‑UI is the boundary layer where AI agents and users meet. It standardizes how agent state, UI intents, and user interactions flow between your model/agent runtime and your app's frontend—so you can ship reliable, debuggable, user‑friendly agentic features fast.
+AG-UI is an <u><strong>open</strong></u>, <u><strong>lightweight</strong></u>, <u><strong>event-based</strong></u> protocol that standardizes how AI agents connect to user-facing applications.
+
+
+Built for simplicity and flexibility, it standardizes how agent state, UI intents, and user interactions flow between your model/agent runtime and user-facing frontend applications—to allow application developers to ship reliable, debuggable, user‑friendly agentic features fast.
+
+
+
+<div style={{textAlign: 'center', margin: '2rem 0'}}>
+  <img src="/images/ag-ui-overview-with-partners.png" alt="AG-UI Overview" style={{maxWidth: '100%', height: 'auto', borderRadius: '8px'}} />
+</div>
 
 ---
 
-## Built with the ecosystem
+## Why Agentic Apps need AG-UI
 
-**First‑party partnerships & integrations**
+Agentic applications break the simple request/response model that dominated frontend-backend development in the pre-agentic era: a client makes a request, the server returns data, the client renders it, and the interaction ends.
 
-*AG‑UI works across leading agent frameworks and frontend stacks, with shared vocabulary and primitives that keep your UX consistent as your agents evolve.*
+#### The requirements of user‑facing agents
+
+While agents are just software, they exhibit characteristics that make them challenging to serve behind traditional REST/GraphQL APIs:
+
+- Agents are **long‑running** and **stream** intermediate work—often across multi‑turn sessions.
+- Agents are **nondeterministic** and can **control application UI nondeterministically**.
+- Agents simultanously mix **structured + unstructured IO** (e.g. text & voice, alongside tool calls and state updates).
+- Agents need user-interactive **composition**: e.g. they may call sub‑agents, often recursively.
+- And more...
+
+AG-UI builds on top of the foundational protocols of the web (HTTP, WebSockets) as an abstraction layer designed for the agentic age—bridging the gap between traditional client-server architectures and the dynamic, stateful nature of AI agents.
+
+### The AI protocol landscape
+
+AG-UI has emerged as the 3rd leg of the AI protocol landscape:
+- MCP: Connects agents to tool and to context.
+- A2A: Connects agents to other agents.
+- AG-UI: Connects agents to users (through user-facing applications)
 
 <div style={{textAlign: 'center', margin: '2rem 0'}}>
-  <img src="/images/ag-ui-concept.png" alt="AG-UI Architecture Illustration" style={{maxWidth: '100%', height: 'auto', borderRadius: '8px'}} />
+  <img src="/images/ai-protocol-stack.png" alt="AI Protocol Stack" style={{maxWidth: '40%', height: 'auto', borderRadius: '8px'}} />
 </div>
+
+These protocols are complimentary and have distinct technical goals; and a single agent can and often does use all 3 simultanously.
+Where these protocols intersect, there are opportunities for seamless handoffs and interoperability—work on these integration points is actively ongoing.
+AG-UI's mandate is to support the full set of building blocks required by modern agentic applications.
+
+
 
 
 ---
@@ -158,21 +189,6 @@ AG‑UI is the boundary layer where AI agents and users meet. It standardizes ho
 <Callout type="info" icon="lightbulb">
 You can see demo apps of the AG-UI features with the framework of your choice, with preview, code and walkthrough docs in the [AG-UI Dojo](dojo.ag-ui.com)
 </Callout>
-
----
-
-## Why Agentic Apps need AG-UI
-
-**Agentic apps break the classic request/response contract.** Agents run for longer, stream work as they go, and make nondeterministic choices that can affect your UI and state. AG‑UI defines a clean, observable boundary so frontends remain predictable while agents stay flexible.
-
-### What's hard about user‑facing agents?
-
-- Agents are **long‑running** and **stream** intermediate work—often across multi‑turn sessions.
-- Agents are **nondeterministic** and can **control UI** in ways that must be supervised.
-- Apps must mix **structured + unstructured IO** (text, voice, tool calls, state updates).
-- Agents need **composition**: agents **call sub‑agents**, often non-deterministically.
-
-With AG‑UI, these become deliberate, well‑typed interactions rather than ad‑hoc wiring.
 
 ---
 
