@@ -28,95 +28,108 @@ Built for simplicity and flexibility, it standardizes how agent state, UI intent
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Token‑level and tool‑event streaming for responsive UIs.
+        Live token and event streaming for responsive multi turn sessions, with cancel and resume.
       </div>
     </div>
   </div>
 
   <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Static generative UI
+      Multimodality
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Render model output into stable, typed components.
+        Typed attachments and real time media (files, images, audio, transcripts); supports voice, previews, annotations, provenance.
       </div>
     </div>
   </div>
 
   <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Declarative generative UI
+      Generative UI, static
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Let agents propose UI trees; app decides what to mount.
+        Render model output as stable, typed components under app control.
       </div>
     </div>
   </div>
 
   <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Frontend tools
+      Generative UI, declarative
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Safe, typed tool calls that bridge agent logic to app actions.
+        Small declarative language for constrained yet open-ended agent UIs; agents propose trees and constraints, the app validates and mounts.
       </div>
     </div>
   </div>
 
   <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Interrupts & human‑in‑the‑loop
+      Shared state
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Pause, approve, edit, or steer mid‑flow.
+        (Read-only & read-write). Typed store shared between agent and app, with streamed event-sourced diffs and conflict resolution for snappy collaboration.
       </div>
     </div>
   </div>
 
-  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
-    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      In‑chat + in‑app interactions
-    </div>
-    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
-      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Chat commands alongside regular app controls.
-      </div>
-    </div>
-  </div>
-
-  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
-    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Attachments & multimodality
-    </div>
-    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
-      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Files, images, audio, and structured payloads.
-      </div>
-    </div>
-  </div>
-
-  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
       Thinking steps
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Expose summaries/redactions of chain‑of‑thought artifacts to users, safely.
+        Visualize intermediate reasoning from traces and tool events; no raw chain of thought.
+      </div>
+    </div>
+  </div>
+
+
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
+      Frontend tool calls
+    </div>
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Typed handoffs from agent to frontend-executed actions, and back.
       </div>
     </div>
   </div>
 
   <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Sub‑agent calls
+      Backend tool rendering & side effects
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Orchestrate nested agents and delegate specialized tasks.
+        Visualize backend tool outputs in app and chat, emit side effects as first-class events.
+      </div>
+    </div>
+  </div>
+
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
+      Interrupts (human in the loop)
+    </div>
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Pause, approve, edit, retry, or escalate mid flow without losing state.
+      </div>
+    </div>
+  </div>
+
+
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
+      Sub-agents and composition
+    </div>
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Nested delegation with scoped state, tracing, and cancellation.
       </div>
     </div>
   </div>
@@ -127,7 +140,29 @@ Built for simplicity and flexibility, it standardizes how agent state, UI intent
     </div>
     <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
       <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
-        Guardrails, policies, and UX affordances to keep agents on track.
+        Dynamically redirect agent execution with real-time user input to guide behavior and outcomes.
+      </div>
+    </div>
+  </div>
+
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
+      Tool output streaming
+    </div>
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Stream tool results and logs so UIs can render long-running effects in real time.
+      </div>
+    </div>
+  </div>
+
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
+    <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
+      Custom events
+    </div>
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Open-ended data exchange for needs not covered by the protocol.
       </div>
     </div>
   </div>
