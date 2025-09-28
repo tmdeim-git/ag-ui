@@ -9,49 +9,13 @@ description:
 AG-UI is an <u><strong>open</strong></u>, <u><strong>lightweight</strong></u>, <u><strong>event-based</strong></u> protocol that standardizes how AI agents connect to user-facing applications.
 
 
-Built for simplicity and flexibility, it standardizes how agent state, UI intents, and user interactions flow between your model/agent runtime and user-facing frontend applications—to allow application developers to ship reliable, debuggable, user‑friendly agentic features fast.
+Built for simplicity and flexibility, it standardizes how agent state, UI intents, and user interactions flow between your model/agent runtime and user-facing frontend applications—to allow application developers to ship reliable, debuggable, user‑friendly agentic features fast while focusing on application needs and avoding complex ad-hoc wiring.
 
 
 
 <div style={{textAlign: 'center', margin: '2rem 0'}}>
   <img src="/images/ag-ui-overview-with-partners.png" alt="AG-UI Overview" style={{maxWidth: '100%', height: 'auto', borderRadius: '8px'}} />
 </div>
-
----
-
-## Why Agentic Apps need AG-UI
-
-Agentic applications break the simple request/response model that dominated frontend-backend development in the pre-agentic era: a client makes a request, the server returns data, the client renders it, and the interaction ends.
-
-#### The requirements of user‑facing agents
-
-While agents are just software, they exhibit characteristics that make them challenging to serve behind traditional REST/GraphQL APIs:
-
-- Agents are **long‑running** and **stream** intermediate work—often across multi‑turn sessions.
-- Agents are **nondeterministic** and can **control application UI nondeterministically**.
-- Agents simultanously mix **structured + unstructured IO** (e.g. text & voice, alongside tool calls and state updates).
-- Agents need user-interactive **composition**: e.g. they may call sub‑agents, often recursively.
-- And more...
-
-AG-UI builds on top of the foundational protocols of the web (HTTP, WebSockets) as an abstraction layer designed for the agentic age—bridging the gap between traditional client-server architectures and the dynamic, stateful nature of AI agents.
-
-### The AI protocol landscape
-
-AG-UI has emerged as the 3rd leg of the AI protocol landscape:
-- MCP: Connects agents to tool and to context.
-- A2A: Connects agents to other agents.
-- AG-UI: Connects agents to users (through user-facing applications)
-
-<div style={{textAlign: 'center', margin: '2rem 0'}}>
-  <img src="/images/ai-protocol-stack.png" alt="AI Protocol Stack" style={{maxWidth: '40%', height: 'auto', borderRadius: '8px'}} />
-</div>
-
-These protocols are complimentary and have distinct technical goals; and a single agent can and often does use all 3 simultanously.
-Where these protocols intersect, there are opportunities for seamless handoffs and interoperability—work on these integration points is actively ongoing.
-AG-UI's mandate is to support the full set of building blocks required by modern agentic applications.
-
-
-
 
 ---
 
@@ -169,6 +133,47 @@ AG-UI's mandate is to support the full set of building blocks required by modern
   </div>
 </div>
 
+
+
+---
+
+## Why Agentic Apps need AG-UI
+
+Agentic applications break the simple request/response model that dominated frontend-backend development in the pre-agentic era: a client makes a request, the server returns data, the client renders it, and the interaction ends.
+
+#### The requirements of user‑facing agents
+
+While agents are just software, they exhibit characteristics that make them challenging to serve behind traditional REST/GraphQL APIs:
+
+- Agents are **long‑running** and **stream** intermediate work—often across multi‑turn sessions.
+- Agents are **nondeterministic** and can **control application UI nondeterministically**.
+- Agents simultanously mix **structured + unstructured IO** (e.g. text & voice, alongside tool calls and state updates).
+- Agents need user-interactive **composition**: e.g. they may call sub‑agents, often recursively.
+- And more...
+
+AG-UI is an event-based protocol that enables dynamic communication between agentic frontends and backends. It builds on top of the foundational protocols of the web (HTTP, WebSockets) as an abstraction layer designed for the agentic age—bridging the gap between traditional client-server architectures and the dynamic, stateful nature of AI agents.
+
+## The AI protocol landscape
+
+AG-UI has emerged as the 3rd leg of the AI protocol landscape:
+<div style={{textAlign: 'center', margin: '2rem 0'}}>
+  <img src="/images/ai-protocol-stack.png" alt="AI Protocol Stack" style={{maxWidth: '40%', height: 'auto', borderRadius: '8px'}} />
+</div>
+
+- MCP: Connects agents to tool and to context.
+- A2A: Connects agents to other agents.
+- **AG-UI:** Connects agents to users (through user-facing applications)
+
+
+These protocols are complimentary and have distinct technical goals; a single agent can and often does use all 3 simultanously.
+Where these protocols intersect, there are opportunities for seamless handshakes facilitating interoperability—work on these integration points is actively ongoing.
+AG-UI's mandate is to support the full set of building blocks required by modern agentic applications.
+
+
+
+
+---
+
 ## AG-UI in action
 
 <div style={{textAlign: 'center', margin: '3rem 0 1rem 0'}}>
@@ -213,22 +218,6 @@ AG-UI was born from an initial partnership between CopilotKit, LangGraph and Cre
 | [Cloudflare Agents](https://developers.cloudflare.com/agents/) | Open to Contributions | Coming Soon |
 
 ---
-
-## Comparison with other protocols
-
-AG-UI focuses explicitly and specifically on the agent-user interactivity layer.
-It does not compete with protocols such as A2A (Agent-to-Agent protocol) and MCP
-(Model Context Protocol).
-
-For example, the same agent may communicate with another agent via A2A while
-communicating with the user via AG-UI, and while calling tools provided by an
-MCP server.
-
-These protocols serve complementary purposes in the agent ecosystem:
-
-- **AG-UI**: Handles human-in-the-loop interaction and streaming UI updates
-- **A2A**: Facilitates agent-to-agent communication and collaboration
-- **MCP**: Standardizes tool calls and context handling across different models
 
 ## Quick Start
 
