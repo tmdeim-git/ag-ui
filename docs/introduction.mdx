@@ -156,12 +156,14 @@ Built for simplicity and flexibility, it standardizes how agent state, UI intent
     </div>
   </div>
 
-  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onClick={() => window.location.href = '/concepts/events'} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; }}>
+  <div style={{border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', transition: 'all 0.3s ease', cursor: 'pointer'}} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#3b82f6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.15)'; e.currentTarget.querySelector('.content').style.maxHeight = '200px'; e.currentTarget.querySelector('.content').style.opacity = '1'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#e5e7eb'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.querySelector('.content').style.maxHeight = '0px'; e.currentTarget.querySelector('.content').style.opacity = '0'; }}>
     <div style={{padding: '1rem 1.5rem', backgroundColor: '#f9fafb', fontWeight: '600', color: '#374151'}}>
-      Events
+      Custom events
     </div>
-    <div style={{padding: '1rem 1.5rem', color: '#6b7280', lineHeight: '1.6'}}>
-      Learn about AG-UI's event-driven protocol and all available event types.
+    <div className="content" style={{maxHeight: '0px', opacity: '0', overflow: 'hidden', transition: 'all 0.3s ease', padding: '0 1.5rem', backgroundColor: '#ffffff'}}>
+      <div style={{padding: '1rem 0', color: '#6b7280', lineHeight: '1.6'}}>
+        Open-ended data exchange for needs not covered by the protocol.
+      </div>
     </div>
   </div>
 </div>
