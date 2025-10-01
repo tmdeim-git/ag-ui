@@ -66,7 +66,7 @@ export const menuIntegrations: MenuIntegrationConfig[] = [
   },
   {
     id: "adk-middleware",
-    name: "ADK Middleware",
+    name: "Google ADK",
     features: [
       "agentic_chat",
       "human_in_the_loop",
