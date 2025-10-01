@@ -16,6 +16,8 @@ import getEnvVars from "./env";
 import { mastra } from "./mastra";
 import { PydanticAIAgent } from "@ag-ui/pydantic-ai";
 import { ADKAgent } from "@ag-ui/adk";
+import { HttpAgent } from "@ag-ui/client";
+import { A2AMiddlewareAgent } from "@ag-ui/a2a-middleware";
 
 const envVars = getEnvVars();
 export const agentsIntegrations: AgentIntegrationConfig[] = [
@@ -225,7 +227,7 @@ export const agentsIntegrations: AgentIntegrationConfig[] = [
         subgraphs: new LangGraphAgent({
           deploymentUrl: envVars.langgraphTypescriptUrl,
           graphId: "subgraphs",
-        })
+        }),
       };
     },
   },
@@ -282,6 +284,36 @@ export const agentsIntegrations: AgentIntegrationConfig[] = [
         }),
         predictive_state_updates: new CrewAIAgent({
           url: `${envVars.crewAiUrl}/predictive_state_updates`,
+        }),
+      };
+    },
+  },
+  {
+    id: "a2a",
+    agents: async () => {
+      // A2A agents: building management, finance, it agents
+      const agentUrls = [envVars.a2aMiddlewareBuildingsManagementUrl, envVars.a2aMiddlewareFinanceUrl, envVars.a2aMiddlewareItUrl];
+      // AGUI orchestration/routing agent
+      const orchestrationAgent = new HttpAgent({
+        url: envVars.a2aMiddlewareOrchestratorUrl,
+      });
+      return {
+        a2a_chat: new A2AMiddlewareAgent({
+          description: "Middleware that connects to remote A2A agents",
+          agentUrls,
+          orchestrationAgent,
+          instructions: `
+          You are an HR agent. You are responsible for hiring employees and other typical HR tasks.
+
+          It's very important to contact all the departments necessary to complete the task.
+          For example, to hire an employee, you must contact all 3 departments: Finance, IT and Buildings Management. Help the Buildings Management department to find a table.
+
+          You can make tool calls on behalf of other agents.
+          DO NOT FORGET TO COMMUNICATE BACK TO THE RELEVANT AGENT IF MAKING A TOOL CALL ON BEHALF OF ANOTHER AGENT!!!
+
+          When choosing a seat with the buildings management agent, You MUST use the \`pickTable\` tool to have the user pick a seat.
+          The buildings management agent will then use the \`pickSeat\` tool to pick a seat.
+          `,
         }),
       };
     },
