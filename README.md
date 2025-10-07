@@ -96,7 +96,7 @@ AG-UI was born from CopilotKit's initial partnership with LangGraph and CrewAI -
 | [OpenAI Agent SDK](https://openai.github.io/openai-agents-python/) | 🛠️ In Progress           | –                                                                            | Community                |
 | [Cloudflare Agents](https://developers.cloudflare.com/agents/)     | 💡 Open to Contributions | –                                                                            | Community                |
 
-[View all supported frameworks →](https://ag-ui.com/frameworks)
+[View all supported frameworks →](https://docs.ag-ui.com/introduction#supported-frameworks)
 
 
 | Language SDK                                                       | Status                    | AG-UI Resources                                                              |
