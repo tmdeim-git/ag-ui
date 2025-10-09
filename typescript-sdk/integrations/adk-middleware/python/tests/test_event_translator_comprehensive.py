@@ -95,20 +95,21 @@ class TestEventTranslatorComprehensive:
 
     @pytest.mark.asyncio
     async def test_translate_function_calls_detection(self, translator, mock_adk_event):
-        """Test function calls detection and logging."""
-        # Mock event with function calls
+        """Test that function calls produce ToolCall events."""
         mock_function_call = MagicMock()
         mock_function_call.name = "test_function"
+        mock_function_call.id = "call_123"
+        mock_function_call.args = {"param": "value"}
         mock_adk_event.get_function_calls = MagicMock(return_value=[mock_function_call])
 
-        with patch('ag_ui_adk.event_translator.logger') as mock_logger:
-            events = []
-            async for event in translator.translate(mock_adk_event, "thread_1", "run_1"):
-                events.append(event)
+        events = []
+        async for event in translator.translate(mock_adk_event, "thread_1", "run_1"):
+            events.append(event)
 
-            # Should log function calls detection (along with the ADK Event debug log)
-            debug_calls = [str(call) for call in mock_logger.debug.call_args_list]
-            assert any("ADK function calls detected: 1 calls" in call for call in debug_calls)
+        type_names = [str(event.type).split('.')[-1] for event in events]
+        assert type_names == ["TOOL_CALL_START", "TOOL_CALL_ARGS", "TOOL_CALL_END"]
+        ids = [getattr(event, 'tool_call_id', None) for event in events]
+        assert ids == ["call_123", "call_123", "call_123"]
 
     @pytest.mark.asyncio
     async def test_translate_function_responses_handling(self, translator, mock_adk_event):
@@ -281,9 +282,14 @@ class TestEventTranslatorComprehensive:
         async for event in translator.translate(mock_adk_event_with_content, "thread_1", "run_1"):
             events.append(event)
 
-        assert len(events) == 3  # START, CONTENT , END
+        # The translator keeps streaming open; forcing a close should yield END
+        async for event in translator.force_close_streaming_message():
+            events.append(event)
+
+        assert len(events) == 3  # START, CONTENT, END (forced close)
         assert isinstance(events[0], TextMessageStartEvent)
         assert isinstance(events[1], TextMessageContentEvent)
+        assert isinstance(events[2], TextMessageEndEvent)
 
     @pytest.mark.asyncio
     async def test_translate_text_content_final_response_callable(self, translator, mock_adk_event_with_content):
@@ -810,8 +816,8 @@ class TestEventTranslatorComprehensive:
         async for event in translator.translate(mock_adk_event_with_content, "thread_1", "run_1"):
             events1.append(event)
 
-        assert len(events1) == 3  # START, CONTENT , END
-        assert translator._is_streaming is False
+        assert len(events1) == 2  # START, CONTENT (stream remains open)
+        assert translator._is_streaming is True
         message_id = events1[0].message_id
 
         # Second partial event (should continue streaming)
@@ -822,9 +828,11 @@ class TestEventTranslatorComprehensive:
         async for event in translator.translate(mock_adk_event_with_content, "thread_1", "run_1"):
             events2.append(event)
 
-        assert len(events2) == 3  # Will start from begining (START , CONTENT , END)
-        assert isinstance(events2[1], TextMessageContentEvent)
-        assert events2[0].message_id != message_id  # Not the same message ID Because its a new streaming
+        assert len(events2) == 1  # Additional CONTENT chunk
+        assert isinstance(events2[0], TextMessageContentEvent)
+        assert events2[0].message_id == message_id  # Same stream continues
+        assert translator._is_streaming is True
+        assert translator._streaming_message_id == message_id
 
         # Final event (should end streaming - requires is_final_response=True)
         mock_adk_event_with_content.partial = False
@@ -835,7 +843,9 @@ class TestEventTranslatorComprehensive:
         async for event in translator.translate(mock_adk_event_with_content, "thread_1", "run_1"):
             events3.append(event)
 
-        assert len(events3) == 0  # No more message (turn Complete)
+        assert len(events3) == 1  # Final END to close the stream
+        assert isinstance(events3[0], TextMessageEndEvent)
+        assert events3[0].message_id == message_id
 
         # Should reset streaming state
         assert translator._is_streaming is False
