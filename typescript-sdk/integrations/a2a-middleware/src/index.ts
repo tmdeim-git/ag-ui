@@ -17,7 +17,7 @@ import {
 
 import { AgentCard, SendMessageResponse, SendMessageSuccessResponse } from "@a2a-js/sdk";
 import { A2AClient } from "@a2a-js/sdk/client";
-import { randomUUID } from "@ag-ui/client";
+import { randomUUID } from "crypto";
 import { Observable, Subscriber, tap } from "rxjs";
 import { createSystemPrompt, sendMessageToA2AAgentTool } from "./utils";
 
@@ -125,6 +125,7 @@ export class A2AMiddlewareAgent extends AbstractAgent {
         pendingTextMessages.add(textMessageStartEvent.messageId);
         if (this.debug) {
           console.debug("Added pending text message:", textMessageStartEvent.messageId);
+          console.debug("Pending text messages now:", Array.from(pendingTextMessages));
         }
         return;
       }
@@ -133,8 +134,13 @@ export class A2AMiddlewareAgent extends AbstractAgent {
         pendingTextMessages.delete(textMessageEndEvent.messageId);
         if (this.debug) {
           console.debug("Removed pending text message:", textMessageEndEvent.messageId);
+          console.debug("Pending text messages now:", Array.from(pendingTextMessages));
         }
         return;
+      }
+      if (event.type === EventType.TEXT_MESSAGE_CONTENT && this.debug) {
+        console.debug("Processing TEXT_MESSAGE_CONTENT event:", event);
+        console.debug("Pending text messages:", Array.from(pendingTextMessages));
       }
     };
 
@@ -282,9 +288,14 @@ export class A2AMiddlewareAgent extends AbstractAgent {
           }
 
           // Proxy all other events
-          if (this.debug && event.type === EventType.TEXT_MESSAGE_CONTENT) {
-            console.debug("Forwarding TEXT_MESSAGE_CONTENT event:", event);
-            console.debug("Pending text messages:", Array.from(pendingTextMessages));
+          if (this.debug) {
+            if (event.type === EventType.TEXT_MESSAGE_START) {
+              console.debug("Forwarding TEXT_MESSAGE_START event:", (event as TextMessageStartEvent).messageId);
+            } else if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
+              console.debug("Forwarding TEXT_MESSAGE_CONTENT event:", event);
+            } else if (event.type === EventType.TEXT_MESSAGE_END) {
+              console.debug("Forwarding TEXT_MESSAGE_END event:", (event as TextMessageEndEvent).messageId);
+            }
           }
           observer.next(event);
         },
