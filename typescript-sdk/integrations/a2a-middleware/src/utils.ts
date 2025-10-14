@@ -1,4 +1,5 @@
 import { AgentCard } from "@a2a-js/sdk";
+import { AbstractAgent } from "@ag-ui/client";
 
 const getSpecificInstructions = (additionalInstructions?: string) => {
 
@@ -21,7 +22,21 @@ ${additionalInstructions}
 };
 
 
-export const createSystemPrompt = (agentCards: AgentCard[], additionalInstructions?: string) => `
+export const createSystemPrompt = (
+  agentCards: AgentCard[],
+  directAgents: AbstractAgent[],
+  additionalInstructions?: string
+) => {
+  // Combine agent information from both sources
+  const allAgentInfo = [
+    ...agentCards.map((card) => ({ name: card.name, description: card.description })),
+    ...directAgents.map((agent) => ({
+      name: agent.agentId || 'unnamed',
+      description: agent.description || 'No description'
+    }))
+  ];
+
+  return `
 ${getSpecificInstructions(additionalInstructions)}
 
 **BEGIN General Instructions:**
@@ -58,9 +73,10 @@ THEN REACH OUT TO THE APPROPRIATE AGENTS TO COMPLETE THE TASK.
 
 **Agent Roster:**
 * Available Agents:
-${JSON.stringify(agentCards.map((agent) => ({ name: agent.name, description: agent.description })))}
+${JSON.stringify(allAgentInfo)}
 **END General Instructions:**
 `.trim();
+};
 
 // * **Transparent Communication:** Always present the complete and detailed response from the remote agent to the user.
 
