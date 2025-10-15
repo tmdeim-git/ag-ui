@@ -1,7 +1,7 @@
 {
   "name": "a2a-middleware",
   "author": "Markus Ecker <markus.ecker@gmail.com>",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -11,7 +11,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch",
+    "build:dev": "tsup --minify=false",
+    "dev": "tsup --watch --minify=false",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit",
     "test": "jest",

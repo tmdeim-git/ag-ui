@@ -6,78 +6,68 @@ import {
   Message,
   RunAgentInput,
   RunFinishedEvent,
-  TextMessageChunkEvent,
   TextMessageEndEvent,
-  TextMessageStartEvent,
-  ToolCallArgsEvent,
   ToolCallResultEvent,
-  ToolCallStartEvent,
-  transformChunks
+  ToolCallStartEvent
 } from "@ag-ui/client";
 
-import { AgentCard, SendMessageResponse, SendMessageSuccessResponse } from "@a2a-js/sdk";
-import { A2AClient } from "@a2a-js/sdk/client";
 import { randomUUID } from "crypto";
-import { Observable, Subscriber, tap } from "rxjs";
+import { appendFileSync, writeFileSync } from "fs";
+import { Observable, Subscriber } from "rxjs";
 import { createSystemPrompt, sendMessageToA2AAgentTool } from "./utils";
 
-
 export interface A2AAgentConfig extends AgentConfig {
-  agentUrls?: string[];  // Optional: for remote A2A agents
-  agents?: AbstractAgent[];  // New: for direct agent instances
+  agents: AbstractAgent[];
   instructions?: string;
   orchestrationAgent: AbstractAgent;
-}
-
-// Internal interface for unified agent handling
-interface UnifiedAgent {
-  name: string;
-  description: string;
-  client?: A2AClient;  // For URL-based agents
-  agent?: AbstractAgent;  // For direct agents
 }
 
 export class A2AMiddlewareAgent extends AbstractAgent {
-  agentClients: A2AClient[];
-  directAgents: AbstractAgent[];  // New: store direct agents
-  unifiedAgents: UnifiedAgent[];  // New: unified view of all agents
-  agentCards: Promise<AgentCard[]>;
+  agents: AbstractAgent[];
   instructions?: string;
   orchestrationAgent: AbstractAgent;
-  toolCallArgs: Map<string, string>;  // Store tool call arguments by ID
+  toolCallArgs: Map<string, string>;
+  debugLogFile: string;
 
   constructor(config: A2AAgentConfig) {
     super(config);
     this.instructions = config.instructions;
+    this.agents = config.agents;
     this.orchestrationAgent = config.orchestrationAgent;
-    this.toolCallArgs = new Map<string, string>();
+    this.toolCallArgs = new Map();
+    this.debugLogFile = './a2a-middleware-debug.log';
 
-    // Handle URL-based agents (existing logic)
-    this.agentClients = (config.agentUrls || []).map((url) => new A2AClient(url));
+    // Initialize log file
+    if (this.debug) {
+      try {
+        writeFileSync(this.debugLogFile, `=== A2A Middleware Debug Log Started at ${new Date().toISOString()} ===\n\n`);
+        console.log(`🔍 A2A Middleware debug logging enabled. Check ${this.debugLogFile} for detailed logs.`);
+      } catch (error) {
+        console.error('Failed to initialize debug log file:', error);
+      }
+    }
+  }
 
-    // Store direct agents (new)
-    this.directAgents = config.agents || [];
+  private writeDebugLog(message: string, data?: any) {
+    if (!this.debug) return;
 
-    // Create unified agent list
-    this.unifiedAgents = [
-      // URL-based agents
-      ...this.agentClients.map((client, index) => ({
-        client,
-        name: `url_agent_${index}`,
-        description: `Remote A2A agent at ${(config.agentUrls || [])[index]}`
-      })),
-      // Direct agents
-      ...this.directAgents.map((agent, index) => ({
-        agent,
-        name: agent.agentId || `direct_agent_${index}`,
-        description: agent.description || `Direct agent ${index}`
-      }))
-    ];
+    try {
+      const timestamp = new Date().toISOString();
+      let logEntry = `[${timestamp}] ${message}`;
 
-    // Get agent cards only for URL-based agents
-    this.agentCards = config.agentUrls && config.agentUrls.length > 0 ?
-      Promise.all(this.agentClients.map((client) => client.getAgentCard())) :
-      Promise.resolve([]);
+      if (data !== undefined) {
+        if (typeof data === 'object') {
+          logEntry += `\n${JSON.stringify(data, null, 2)}`;
+        } else {
+          logEntry += ` ${String(data)}`;
+        }
+      }
+
+      logEntry += '\n\n';
+      appendFileSync(this.debugLogFile, logEntry);
+    } catch (error) {
+      console.error('Failed to write to debug log file:', error);
+    }
   }
 
   finishTextMessages(
@@ -108,55 +98,24 @@ export class A2AMiddlewareAgent extends AbstractAgent {
     }>,
     input: RunAgentInput,
   ): any {
-    const applyAndProcessEvents = (source$: Observable<BaseEvent>) => {
-      // Apply events to get mutations
-      const mutations$ = this.apply(input, source$, this.subscribers);
-      // Process the mutations
-      const processedMutations$ = this.processApplyEvents(input, mutations$, this.subscribers);
-      // Subscribe to the processed mutations to trigger side effects
-      processedMutations$.subscribe();
-      // Return the original stream to maintain BaseEvent type
-      return source$;
-    };
-
-    const markTextMessageAsPending = (event: BaseEvent) => {
-      if (event.type === EventType.TEXT_MESSAGE_START) {
-        const textMessageStartEvent = event as TextMessageStartEvent;
-        pendingTextMessages.add(textMessageStartEvent.messageId);
-        if (this.debug) {
-          console.debug("Added pending text message:", textMessageStartEvent.messageId);
-          console.debug("Pending text messages now:", Array.from(pendingTextMessages));
-        }
-        return;
-      }
-      if (event.type === EventType.TEXT_MESSAGE_END) {
-        const textMessageEndEvent = event as TextMessageEndEvent;
-        pendingTextMessages.delete(textMessageEndEvent.messageId);
-        if (this.debug) {
-          console.debug("Removed pending text message:", textMessageEndEvent.messageId);
-          console.debug("Pending text messages now:", Array.from(pendingTextMessages));
-        }
-        return;
-      }
-      if (event.type === EventType.TEXT_MESSAGE_CONTENT && this.debug) {
-        console.debug("Processing TEXT_MESSAGE_CONTENT event:", event);
-        console.debug("Pending text messages:", Array.from(pendingTextMessages));
-      }
-    };
-
-    return stream
-      .pipe(transformChunks(this.debug), applyAndProcessEvents, tap(markTextMessageAsPending))
-      .subscribe({
+    return stream.subscribe({
         next: (event: BaseEvent) => {
+          this.writeDebugLog("Middleware received event", { type: event.type, event });
+
           // Handle tool call args events to capture arguments
-          if (event.type === EventType.TOOL_CALL_ARGS) {
-            const argsEvent = event as ToolCallArgsEvent;
-            // Accumulate tool call arguments (they might come in chunks)
-            const existingArgs = this.toolCallArgs.get(argsEvent.toolCallId) || "";
-            this.toolCallArgs.set(argsEvent.toolCallId, existingArgs + (argsEvent.delta || ""));
-            if (this.debug) {
-              console.debug("Captured tool call args:", argsEvent.toolCallId, "delta:", argsEvent.delta, "total:", existingArgs + (argsEvent.delta || ""));
+          if (event.type === "TOOL_CALL_ARGS" && "toolCallId" in event) {
+            const toolCallArgsEvent = event as any;
+            if (toolCallArgsEvent.args) {
+              this.toolCallArgs.set(event.toolCallId as string, toolCallArgsEvent.args);
+            } else if (toolCallArgsEvent.delta) {
+              // Accumulate delta args
+              const existing = this.toolCallArgs.get(event.toolCallId as string) || "";
+              this.toolCallArgs.set(event.toolCallId as string, existing + toolCallArgsEvent.delta);
             }
+            this.writeDebugLog("Stored tool call args", {
+              toolCallId: event.toolCallId,
+              args: this.toolCallArgs.get(event.toolCallId as string)
+            });
             // Proxy the args event normally
             observer.next(event);
             return;
@@ -164,24 +123,28 @@ export class A2AMiddlewareAgent extends AbstractAgent {
 
           // Handle tool call start events for send_message_to_a2a_agent
           if (
-            event.type === EventType.TOOL_CALL_START &&
+            event.type === "TOOL_CALL_START" &&
             "toolCallName" in event &&
             "toolCallId" in event &&
             (event as ToolCallStartEvent).toolCallName.startsWith("send_message_to_a2a_agent")
           ) {
             // Track this as a pending A2A call
             pendingA2ACalls.add(event.toolCallId as string);
-            if (this.debug) {
-              console.debug("Started tracking A2A tool call:", event.toolCallId);
-            }
             // Proxy the start event normally
+            observer.next(event);
+            return;
+          }
+
+          // Handle tool call end events
+          if (event.type === "TOOL_CALL_END" && "toolCallId" in event) {
+            // Proxy the end event normally
             observer.next(event);
             return;
           }
 
           // Handle tool call result events for send_message_to_a2a_agent
           if (
-            event.type === EventType.TOOL_CALL_RESULT &&
+            event.type === "TOOL_CALL_RESULT" &&
             "toolCallId" in event &&
             pendingA2ACalls.has(event.toolCallId as string)
           ) {
@@ -192,7 +155,7 @@ export class A2AMiddlewareAgent extends AbstractAgent {
           }
 
           // Handle run completion events
-          if (event.type === EventType.RUN_FINISHED) {
+          if (event.type === "RUN_FINISHED") {
             this.finishTextMessages(observer, pendingTextMessages);
 
             if (pendingA2ACalls.size > 0) {
@@ -200,15 +163,10 @@ export class A2AMiddlewareAgent extends AbstractAgent {
               const newToolMessages: Message[] = [];
 
               const callProms = [...pendingA2ACalls].map((toolCallId) => {
-                // Get tool call arguments from our stored map
                 const toolArgs = this.toolCallArgs.get(toolCallId);
-
                 if (this.debug) {
-                  console.debug("Looking for tool call args:", toolCallId);
-                  console.debug("Found args:", toolArgs);
-                  console.debug("All stored args:", Array.from(this.toolCallArgs.entries()));
+                  console.debug("Retrieving tool call args for", toolCallId, "found:", !!toolArgs);
                 }
-
                 if (!toolArgs) {
                   throw new Error(`Tool arguments not found for tool call id ${toolCallId}`);
                 }
@@ -227,48 +185,64 @@ export class A2AMiddlewareAgent extends AbstractAgent {
                       toolCallId: toolCallId,
                       content: a2aResponse,
                     };
-                    if (this.debug) {
-                      console.debug("newMessage From a2a agent", newMessage);
-                    }
+                    this.writeDebugLog("newMessage From a2a agent", newMessage);
                     this.addMessage(newMessage);
                     this.orchestrationAgent.addMessage(newMessage);
 
                     // Collect the message so we can add it to input.messages
                     newToolMessages.push(newMessage);
 
-                    const newEvent: ToolCallResultEvent = {
-                      type: EventType.TOOL_CALL_RESULT,
+                    this.writeDebugLog(`[ORCHESTRATOR] Creating tool result for ${toolCallId}`, {
+                      agentName,
+                      responseLength: a2aResponse.length,
+                      responsePreview: a2aResponse.substring(0, 200) + (a2aResponse.length > 200 ? '...' : ''),
+                      messageId: newMessage.id
+                    });
+
+                    const newEvent = {
+                      type: "TOOL_CALL_RESULT",
                       toolCallId: toolCallId,
                       messageId: newMessage.id,
                       content: a2aResponse,
-                    };
+                    } as ToolCallResultEvent;
+
+                    this.writeDebugLog(`[ORCHESTRATOR] Sending tool result event`, newEvent);
 
                     observer.next(newEvent);
 
-                    // Clean up the stored tool call arguments
+                    // Clean up stored tool call args
                     this.toolCallArgs.delete(toolCallId);
                     pendingA2ACalls.delete(toolCallId);
                   })
                   .finally(() => {
-                    // Clean up on error too
-                    this.toolCallArgs.delete(toolCallId);
                     pendingA2ACalls.delete(toolCallId as string);
                   });
               });
 
               Promise.all(callProms).then(() => {
-                this.finishTextMessages(observer, pendingTextMessages);
                 observer.next({
-                  type: EventType.RUN_FINISHED,
+                  type: "RUN_FINISHED",
                   threadId: input.threadId,
                   runId: input.runId,
                 } as RunFinishedEvent);
 
                 // Add all tool result messages to input.messages BEFORE triggering new run
                 // This ensures the orchestrator sees the tool results in its context
+                this.writeDebugLog(`[MIDDLEWARE] Adding ${newToolMessages.length} tool result messages to new run input`);
+                newToolMessages.forEach((msg, i) => {
+                  this.writeDebugLog(`[MIDDLEWARE] Tool message ${i + 1}`, {
+                    role: msg.role,
+                    toolCallId: (msg as any).toolCallId,
+                    contentLength: msg.content?.length || 0,
+                    contentPreview: msg.content?.substring(0, 100) + (msg.content && msg.content.length > 100 ? '...' : '')
+                  });
+                });
+
                 newToolMessages.forEach((msg) => {
                   input.messages.push(msg);
                 });
+
+                this.writeDebugLog(`[MIDDLEWARE] Triggering new run`, { totalMessages: input.messages.length });
 
                 this.triggerNewRun(observer, input, pendingA2ACalls, pendingTextMessages);
               });
@@ -281,22 +255,14 @@ export class A2AMiddlewareAgent extends AbstractAgent {
           }
 
           // Handle run error events - emit immediately and exit
-          if (event.type === EventType.RUN_ERROR) {
+          if (event.type === "RUN_ERROR") {
+            this.writeDebugLog("[MIDDLEWARE] Run error", event);
             observer.next(event);
             observer.error(event);
             return;
           }
 
           // Proxy all other events
-          if (this.debug) {
-            if (event.type === EventType.TEXT_MESSAGE_START) {
-              console.debug("Forwarding TEXT_MESSAGE_START event:", (event as TextMessageStartEvent).messageId);
-            } else if (event.type === EventType.TEXT_MESSAGE_CONTENT) {
-              console.debug("Forwarding TEXT_MESSAGE_CONTENT event:", event);
-            } else if (event.type === EventType.TEXT_MESSAGE_END) {
-              console.debug("Forwarding TEXT_MESSAGE_END event:", (event as TextMessageEndEvent).messageId);
-            }
-          }
           observer.next(event);
         },
         error: (error) => {
@@ -316,8 +282,7 @@ export class A2AMiddlewareAgent extends AbstractAgent {
       const run = async () => {
         let pendingA2ACalls = new Set<string>();
         const pendingTextMessages = new Set<string>();
-        const agentCards = await this.agentCards;
-        const newSystemPrompt = createSystemPrompt(agentCards, this.directAgents, this.instructions);
+        const newSystemPrompt = createSystemPrompt(this.agents, this.instructions);
 
         const messages = input.messages;
         if (messages.length && messages[0].role === "system") {
@@ -341,86 +306,105 @@ export class A2AMiddlewareAgent extends AbstractAgent {
   }
 
   private async sendMessageToA2AAgent(agentName: string, args: string): Promise<string> {
-    // Find the agent in our unified list
-    const unifiedAgent = this.unifiedAgents.find(agent => agent.name === agentName);
+    this.writeDebugLog("Available agents", this.agents.map(a => ({
+      agentId: (a as any).agentId,
+      name: (a as any).agent?.name,
+      id: (a as any).agent?.id
+    })));
+    this.writeDebugLog("Looking for agent", agentName);
 
-    if (!unifiedAgent) {
+    const agent = this.agents.find((agent) => (agent as any).agentId === agentName || (agent as any).agent?.name === agentName || (agent as any).agent?.id === agentName);
+
+    if (!agent) {
       throw new Error(`Agent "${agentName}" not found`);
     }
 
-    if (unifiedAgent.client) {
-      // Handle URL-based agent (existing logic)
-      const { client } = unifiedAgent;
-      const sendResponse: SendMessageResponse = await client.sendMessage({
-        message: {
-          kind: "message",
-          messageId: Date.now().toString(),
-          role: "agent",
-          parts: [{ text: args, kind: "text" }],
-        },
-      });
-
-      if ("error" in sendResponse) {
-        throw new Error(
-          `Error sending message to agent "${agentName}": ${sendResponse.error.message}`,
-        );
-      }
-
-      const result = (sendResponse as SendMessageSuccessResponse).result;
-      let responseContent = "";
-
-      if (result.kind === "message" && result.parts.length > 0 && result.parts[0].kind === "text") {
-        responseContent = result.parts[0].text;
-      } else {
-        responseContent = JSON.stringify(result);
-      }
-
-      return responseContent;
-    } else if (unifiedAgent.agent) {
-      // Handle direct agent (new logic) - run asynchronously and return promise
-      const { agent } = unifiedAgent;
-
-      // Create input for the direct agent
-      const input: RunAgentInput = {
-        threadId: `a2a-${Date.now()}`,
-        runId: `run-${Date.now()}`,
-        messages: [{
-          id: `msg-${Date.now()}`,
+    // Create a run input for the agent
+    const runInput: RunAgentInput = {
+      messages: [
+        {
+          id: randomUUID(),
           role: "user",
           content: args,
-        }],
-        tools: [],
-        context: [],
-        state: {},
-      };
+        }
+      ],
+      threadId: randomUUID(),
+      runId: randomUUID(),
+      tools: [],
+      context: [],
+    };
 
-      // Run the direct agent asynchronously and collect its response
-      return new Promise((resolve, reject) => {
-        let collectedResponse = "";
+    return new Promise<string>((resolve, reject) => {
+      const stream = agent.run(runInput);
+      let responseContent = "";
+      let hasError = false;
+      let textMessageActive = false;
 
-        const subscription = agent.run(input).subscribe({
-          next: (event) => {
-            // Collect text from the direct agent's response
-            if (event.type === EventType.TEXT_MESSAGE_CHUNK) {
-              const textEvent = event as TextMessageChunkEvent;
-              collectedResponse += textEvent.delta;
-            } else if (event.type === EventType.TEXT_MESSAGE_START) {
-              // Track message start for proper lifecycle
-              collectedResponse = ""; // Reset for new message
+      stream.subscribe({
+        next: (event: BaseEvent) => {
+          this.writeDebugLog(`[${agentName}] received event`, { type: event.type, event });
+
+          // Silently consume all events from the delegated agent
+          // Only collect text content, don't forward events to avoid conflicts
+          if (event.type === "TEXT_MESSAGE_START") {
+            textMessageActive = true;
+            this.writeDebugLog(`[${agentName}] Text message started`);
+          } else if (event.type === "TEXT_MESSAGE_END") {
+            textMessageActive = false;
+            this.writeDebugLog(`[${agentName}] Text message ended`, { contentLength: responseContent.length });
+          } else if (event.type === "RUN_ERROR") {
+            hasError = true;
+            this.writeDebugLog(`[${agentName}] Run error`, event);
+            reject(new Error(`Agent "${agentName}" encountered an error`));
+          } else if (event.type === "TEXT_MESSAGE_CONTENT" || event.type === "TEXT_MESSAGE_CHUNK") {
+            // For TEXT_MESSAGE_CHUNK, automatically activate text collection if not already active
+            if (event.type === "TEXT_MESSAGE_CHUNK" && !textMessageActive) {
+              textMessageActive = true;
+              this.writeDebugLog(`[${agentName}] Auto-activated text message for chunk`);
             }
-          },
-          error: (error) => {
-            console.error("Error running direct agent:", error);
-            reject(error);
-          },
-          complete: () => {
-            resolve(collectedResponse || "");
+
+            // Only accumulate if text message is active
+            if (textMessageActive) {
+              const textEvent = event as any;
+              let delta = "";
+              if (textEvent.delta) {
+                delta = textEvent.delta;
+                responseContent += textEvent.delta;
+              } else if (textEvent.content) {
+                delta = textEvent.content;
+                responseContent += textEvent.content;
+              }
+
+              this.writeDebugLog(`[${agentName}] Added content from ${event.type}`, { delta, totalLength: responseContent.length });
+            }
           }
-        });
+          // Ignore all other events (tool calls, etc.) from the delegated agent
+        },
+        error: (error) => {
+          this.writeDebugLog(`[${agentName}] Stream error`, error);
+          hasError = true;
+          reject(error);
+        },
+        complete: () => {
+          // Auto-end text message if it was auto-started
+          if (textMessageActive) {
+            this.writeDebugLog(`[${agentName}] Auto-ending text message on stream completion`);
+            textMessageActive = false;
+          }
+
+          this.writeDebugLog(`[${agentName}] Stream completed`, {
+            finalResponse: responseContent,
+            responseLength: responseContent.length
+          });
+
+          if (!hasError) {
+            const finalResponse = responseContent || "Agent completed the task successfully.";
+            this.writeDebugLog(`[${agentName}] Resolving with`, finalResponse);
+            resolve(finalResponse);
+          }
+        }
       });
-    } else {
-      throw new Error(`Agent "${agentName}" has no client or agent instance`);
-    }
+    });
   }
 
   private triggerNewRun(
