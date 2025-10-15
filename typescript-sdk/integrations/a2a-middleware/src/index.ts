@@ -226,25 +226,61 @@ export class A2AMiddlewareAgent extends AbstractAgent {
                   runId: input.runId,
                 } as RunFinishedEvent);
 
-                // Add all tool result messages to input.messages BEFORE triggering new run
-                // This ensures the orchestrator sees the tool results in its context
-                this.writeDebugLog(`[MIDDLEWARE] Adding ${newToolMessages.length} tool result messages to new run input`);
+                // Store tool results in orchestrator agent's memory
+                this.writeDebugLog(`[MIDDLEWARE] Storing ${newToolMessages.length} tool results in orchestrator memory`);
                 newToolMessages.forEach((msg, i) => {
-                  this.writeDebugLog(`[MIDDLEWARE] Tool message ${i + 1}`, {
+                  this.writeDebugLog(`[MIDDLEWARE] Tool result ${i + 1}`, {
                     role: msg.role,
                     toolCallId: (msg as any).toolCallId,
                     contentLength: msg.content?.length || 0,
                     contentPreview: msg.content?.substring(0, 100) + (msg.content && msg.content.length > 100 ? '...' : '')
                   });
+
+                  // Add to orchestrator agent's message history for memory
+                  this.orchestrationAgent.addMessage(msg);
                 });
 
-                newToolMessages.forEach((msg) => {
-                  input.messages.push(msg);
+                // Create fresh input with sliding window to prevent infinite loops
+                // Keep system message, recent user messages, and recent tool results
+                const freshInput: RunAgentInput = {
+                  messages: [],
+                  threadId: input.threadId,
+                  runId: randomUUID(), // New run ID
+                  tools: input.tools,
+                  context: input.context,
+                };
+
+                // Always include system message
+                const systemMessage = input.messages.find(msg => msg.role === 'system');
+                if (systemMessage) {
+                  freshInput.messages.push(systemMessage);
+                }
+
+                // Use sliding window: keep recent messages but limit total context
+                // Prioritize: system + recent user/assistant messages + recent tool results
+                const WINDOW_SIZE = 6; // Smaller window to reduce tokens while preventing loops
+                const recentMessages = input.messages
+                  .filter(msg => msg.role !== 'system') // Exclude system message (already added)
+                  .slice(-WINDOW_SIZE); // Keep most recent messages
+
+                // Add recent messages to fresh input
+                freshInput.messages.push(...recentMessages);
+
+                // Add the new tool results to provide immediate context
+                // This prevents the orchestrator from calling the same agent again
+                newToolMessages.forEach(msg => {
+                  freshInput.messages.push(msg);
                 });
 
-                this.writeDebugLog(`[MIDDLEWARE] Triggering new run`, { totalMessages: input.messages.length });
+                this.writeDebugLog(`[MIDDLEWARE] Triggering new run with sliding window input`, {
+                  messageCount: freshInput.messages.length,
+                  hasSystemMessage: freshInput.messages.some(msg => msg.role === 'system'),
+                  hasUserMessage: freshInput.messages.some(msg => msg.role === 'user'),
+                  toolResultsIncluded: newToolMessages.length,
+                  windowSize: WINDOW_SIZE
+                });
 
-                this.triggerNewRun(observer, input, pendingA2ACalls, pendingTextMessages);
+                this.triggerNewRun(observer, freshInput, pendingA2ACalls, pendingTextMessages);
               });
             } else {
               observer.next(event);
