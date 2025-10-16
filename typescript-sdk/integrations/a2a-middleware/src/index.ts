@@ -413,6 +413,23 @@ export class A2AMiddlewareAgent extends AbstractAgent {
 
               this.writeDebugLog(`[${agentName}] Added content from ${event.type}`, { delta, totalLength: responseContent.length });
             }
+          } else if (event.type === "TOOL_CALL_RESULT") {
+            const toolResultEvent = event as any;
+            if (toolResultEvent.content) {
+              try {
+                const parsedResult = JSON.parse(toolResultEvent.content);
+                // Format based on the structure of your search results
+                const formattedResult = `\n\nSearch Results:\n${JSON.stringify(parsedResult, null, 2)}\n`;
+                responseContent += formattedResult;
+              } catch (e) {
+                // Fallback if not valid JSON
+                responseContent += `\n\nTool Result:\n${toolResultEvent.content}\n`;
+              }
+              this.writeDebugLog(`[${agentName}] Added tool result content`, {
+                contentLength: toolResultEvent.content.length,
+                totalLength: responseContent.length
+              });
+            }
           }
           // Ignore all other events (tool calls, etc.) from the delegated agent
         },
